@@ -5,11 +5,26 @@ from app.agent.manus import Manus
 from app.logger import logger
 
 
+def get_prompt(args):
+    prompt = ""
+    if args.prompt_file:
+        with open(args.prompt_file, "r") as file:
+            return file.read()
+
+    return args.prompt if args.prompt else input("Enter your prompt: ")
+
+
 async def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Run Manus agent with a prompt")
     parser.add_argument(
         "--prompt", type=str, required=False, help="Input prompt for the agent"
+    )
+    parser.add_argument(
+        "--prompt_file",
+        type=str,
+        required=False,
+        help="Input prompt for the agent through a file",
     )
     args = parser.parse_args()
 
@@ -17,7 +32,7 @@ async def main():
     agent = await Manus.create()
     try:
         # Use command line prompt if provided, otherwise ask for input
-        prompt = args.prompt if args.prompt else input("Enter your prompt: ")
+        prompt = get_prompt(args)
         if not prompt.strip():
             logger.warning("Empty prompt provided.")
             return
